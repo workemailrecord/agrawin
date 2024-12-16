@@ -42,10 +42,13 @@ jobs:
             # Navigate to the project directory
             cd /var/www/$REPO_NAME
 
-            # Clone or pull the repository
-            if [ ! -d ".git" ]; then
-              echo "Cloning repository..."
-              git clone https://github.com/${{ github.repository }} .
+            # Handle uncommitted changes before pulling the repository
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Stashing local changes..."
+              git stash --include-untracked
+              git pull origin main
+              echo "Reapplying stashed changes..."
+              git stash pop || echo "No stashed changes to apply."
             else
               echo "Pulling latest changes..."
               git pull origin main
@@ -64,10 +67,11 @@ jobs:
               echo "Restarting PM2 process..."
               pm2 restart "$REPO_NAME" --update-env
             else
-              echo "Starting PM2 process..."
+              echo "PM2 process not found, starting new process..."
               pm2 start npm --name "$REPO_NAME" -- start
-              pm2 save  # Save PM2 configuration to restart on reboot
             fi
-            
+
+            # Save PM2 configuration to ensure restart on reboot
+            pm2 save || echo "Failed to save PM2 configuration."
 
           EOF
