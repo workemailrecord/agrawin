@@ -62,7 +62,7 @@ jobs:
             # Start or restart the application using PM2
             if pm2 list | grep -q "$REPO_NAME"; then
               echo "Restarting PM2 process..."
-              pm2 restart "$REPO_NAME"
+              pm2 restart "$REPO_NAME" --update-env
             else
               echo "Starting PM2 process..."
               pm2 start npm --name "$REPO_NAME" -- start
