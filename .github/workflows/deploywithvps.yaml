@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repositorys
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -59,13 +59,17 @@ jobs:
               echo "No package.json found, skipping dependency installation."
             fi
 
+            # Setup environment variables for PM2
+            echo "Setting up environment variables..."
+            echo "PORT=3000" > .env
+
             # Start or restart the application using PM2
             if pm2 list | grep -q "$REPO_NAME"; then
               echo "Restarting PM2 process..."
-              pm2 restart "$REPO_NAME"
+              pm2 restart "$REPO_NAME" --update-env
             else
               echo "Starting PM2 process..."
-              pm2 start npm --name "$REPO_NAME" -- start
+              pm2 start npm --name "$REPO_NAME" -- start --env .env
               pm2 save  # Save PM2 configuration to restart on reboot
             fi
 
