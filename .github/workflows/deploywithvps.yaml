@@ -62,14 +62,11 @@ jobs:
             # Start or restart the application using PM2
             if pm2 list | grep -q "$REPO_NAME"; then
               echo "Restarting PM2 process..."
-              pm2 restart "$REPO_NAME" 
+              pm2 restart "$REPO_NAME"
             else
-              echo "PM2 process not found, proceeding to start PM2 step..."
+              echo "Starting PM2 process..."
+              pm2 start npm --name "$REPO_NAME" -- start
+              pm2 save  # Save PM2 configuration to restart on reboot
             fi
-
-            # Start PM2 process
-            echo "Ensuring PM2 process is running..."
-            pm2 start npm --name "$REPO_NAME" -- start || echo "Failed to start PM2 process."
-            pm2 save  # Save PM2 configuration to restart on reboot
 
           EOF
